@@ -1,48 +1,79 @@
-﻿$(function() {
-    UnableToPurchase();
+var gulp = require('gulp');
+var concat = require('gulp-concat');
+var uglify = require('gulp-uglify');
+var sass = require('gulp-sass');
+var cssmin = require('gulp-cssmin');
 
-    $('.form-control').click(function() {
-        var hashtable = {};
-        hashtable['Select'] = '0';
-        hashtable['Vanilla Ice Cream with Caramel Ripple and Almonds'] = '5';
-        hashtable['Vanilla Ice Cream with Cherry Dark Chocolate Ice Cream'] = '7';
-        hashtable['Vanilla Ice Cream with Pistachio'] = '4.5';
+var paths = {
+    webroot: "./wwwroot/",
+    nodeModules: "./node_modules/"
+};
 
-        var hashtableImages = {};
-        hashtableImages['Select'] = '0';
-        hashtableImages['Vanilla Ice Cream with Caramel Ripple and Almonds'] = 'icecream-1.jpg';
-        hashtableImages['Vanilla Ice Cream with Cherry Dark Chocolate Ice Cream'] = 'icecream-2.jpg';
-        hashtableImages['Vanilla Ice Cream with Pistachio'] = 'icecream-3.jpg';
-
-        var iceCreanQuantity = parseFloat($("#quantity").val());
-        var iceCreamFlavor = $("#flavor").val();
-        var priceperweight = parseFloat(hashtable[iceCreamFlavor]);
-        var iceCreamImage = hashtableImages[iceCreamFlavor];
-        var calc = (iceCreanQuantity * priceperweight);
-
-        if (calc && iceCreamImage !== 0) {
-            $('#totalAmount').html(calc + '$');
-            var src = '/images/' + iceCreamImage;
-            $("#iceCreamImage").attr("src", src);
-            $("#formButton").removeAttr('disabled');
-        } else {
-            UnableToPurchase();
-        }
-    });
-
-    function UnableToPurchase() {
-        $('#totalAmount').html('');
-        $("#iceCreamImage").attr("src", '/images/empty.jpg');
-        $("#formButton").attr('disabled', 'disabled');
-    }
+paths.jqueryjs = paths.nodeModules + "jquery/dist/jquery.js";
+paths.popperjs = paths.nodeModules + "popper.js/dist/umd/popper.js";
+paths.bootstrapjs = paths.nodeModules + "bootstrap/dist/js/bootstrap.js";
+paths.vendorjs = [paths.jqueryjs, paths.popperjs, paths.bootstrapjs];
+paths.destinationjsFolder = paths.webroot + "scripts/";
+paths.vendorjsFileName = "vendor.min.js";
+paths.jsFiles = "./Scripts/*.js";
+paths.jsFileName = "script.min.js";
+paths.sassFiles = "./Styles/*.scss";
+paths.compiledCssFileName = "main.min.css";
+paths.destinationCssFolder = paths.webroot + "css/";
+paths.bootstrapCss = paths.nodeModules + "bootstrap/dist/css/bootstrap.css";
+paths.vendorCssFileName = "vendor.min.css";
+ 
+gulp.task("copy-js-file", function() {
+    return gulp.src(paths.jqueryjs)
+        .pipe(gulp.dest(paths.destinationjsFolder));
 });
+
+gulp.task("min-vendor:js", function() {
+    return gulp.src(paths.vendorjs)
+        .pipe(concat(paths.vendorjsFileName))
+        .pipe(uglify())
+        .pipe(gulp.dest(paths.destinationjsFolder));
+});
+
+gulp.task("min:js", function() {
+    return gulp.src(paths.jsFiles)
+        .pipe(concat(paths.jsFileName))
+        .pipe(uglify())
+        .pipe(gulp.dest(paths.destinationjsFolder));
+});
+
+gulp.task("min:scss", function() {
+    return gulp.src(paths.sassFiles)
+        .pipe(sass().on('error', sass.logError))
+        .pipe(concat(paths.compiledCssFileName))
+        .pipe(cssmin())
+        .pipe(gulp.dest(paths.destinationCssFolder));
+});
+
+gulp.task("min-vendor:css", function() {
+    return gulp.src(paths.bootstrapCss)
+        .pipe(concat(paths.vendorCssFileName))
+        .pipe(cssmin())
+        .pipe(gulp.dest(paths.destinationCssFolder));
+});
+
+gulp.task("js-watcher", function() {
+    gulp.watch('./Scripts/*.js', gulp.series("min:js"));
+});
+
+gulp.task("sass-watcher", function() {
+    gulp.watch('./Styles/*.scss', gulp.series("min:scss"));
+});
+
+
+
 
 // SIG // Begin signature block
 // SIG // MIIdjAYJKoZIhvcNAQcCoIIdfTCCHXkCAQExCzAJBgUr
 // SIG // DgMCGgUAMGcGCisGAQQBgjcCAQSgWTBXMDIGCisGAQQB
 // SIG // gjcCAR4wJAIBAQQQEODJBs441BGiowAQS9NQkAIBAAIB
-// SIG // AAIBAAIBAAIBADAhMAkGBSsOAwIaBQAEFGJNeSX5JHIs
-// SIG // OGtCRfXddMzsVXiroIIYajCCBNowggPCoAMCAQICEzMA
+// SIG // AAIBAAIBAAIBADAhMAkGBSsOAwIaBQAEFBa0zib5AzoK
+// SIG // KuoXy/CB2BrfgvqRoIIYajCCBNowggPCoAMCAQICEzMA
 // SIG // AAEiJ+9r7eL7oKMAAAAAASIwDQYJKoZIhvcNAQEFBQAw
 // SIG // dzELMAkGA1UEBhMCVVMxEzARBgNVBAgTCldhc2hpbmd0
 // SIG // b24xEDAOBgNVBAcTB1JlZG1vbmQxHjAcBgNVBAoTFU1p
@@ -239,33 +270,33 @@
 // SIG // QSAyMDExAhMzAAABA14lHJkfox64AAAAAAEDMAkGBSsO
 // SIG // AwIaBQCggaIwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcC
 // SIG // AQQwHAYKKwYBBAGCNwIBCzEOMAwGCisGAQQBgjcCARUw
-// SIG // IwYJKoZIhvcNAQkEMRYEFBjotv2F2ddUHoeIwFzPk6ZD
-// SIG // WddmMEIGCisGAQQBgjcCAQwxNDAyoBSAEgBNAGkAYwBy
+// SIG // IwYJKoZIhvcNAQkEMRYEFOxH4qGddH35YgpGKo7/cH2C
+// SIG // vqHqMEIGCisGAQQBgjcCAQwxNDAyoBSAEgBNAGkAYwBy
 // SIG // AG8AcwBvAGYAdKEagBhodHRwOi8vd3d3Lm1pY3Jvc29m
-// SIG // dC5jb20wDQYJKoZIhvcNAQEBBQAEggEAjsvfabI8waEx
-// SIG // UFMYyNqVBFgqu3kVQtLaDnBz0QdkT/TeA38m2GHI5J+N
-// SIG // tepZDvNsGFc2L8jFDOLmkaK6N3/SngzT1pQB7rbGwUIo
-// SIG // QB9ddop7PNONQmp9VCYgXMqH0qPLs/gXLy1FdYk9b93K
-// SIG // 0RWYzIUscxDYd/L6ooTHa8P9yJ/o+PX4G0K/WrlTduUv
-// SIG // ssN60637/hQKDaEmTZ2Llzz+V+mAReetHa29WjBsSIiU
-// SIG // SMhlDkxbf1CpSmoXE0v6Jatpajlwn7ayWEk66eK19J9Y
-// SIG // 8UCWR83xWUH+HUHa8aVPjTSgHjLfoBfZBFuf7at5JdxS
-// SIG // o9nO4AfHcj9hb5z1EmpG/6GCAigwggIkBgkqhkiG9w0B
+// SIG // dC5jb20wDQYJKoZIhvcNAQEBBQAEggEAOlaPzBGws/HW
+// SIG // sz9ygHXn73zClnZ75CV5V/C6BkIRxgoyUsLd+Aat8XDy
+// SIG // LvlB4Z6oyXZfThLIWfS/nOJNwHjXUKqTqkf2kQucp7S2
+// SIG // Si3+DmVNggYh/FbVFiJrARvk64PB2VYV65KUrPFwaJaO
+// SIG // llh6are62TRWyNlf38GZGNeIsJgu50gvbZ2ROGqfP2lY
+// SIG // yLvOzpeOIh9DmkdxtZMkfm4C/UWWe4iUcJWJgPv0t6kg
+// SIG // MyvaGbLFSQsIk861y19CUJrJikAiDhcjrynX/95kq1Z9
+// SIG // lxZnv3TYopTteFRsr38gLYrf4agGTZbQASPRJTTzLb1c
+// SIG // /Kev7d7YxZ4Qloc/XQEAP6GCAigwggIkBgkqhkiG9w0B
 // SIG // CQYxggIVMIICEQIBATCBjjB3MQswCQYDVQQGEwJVUzET
 // SIG // MBEGA1UECBMKV2FzaGluZ3RvbjEQMA4GA1UEBxMHUmVk
 // SIG // bW9uZDEeMBwGA1UEChMVTWljcm9zb2Z0IENvcnBvcmF0
 // SIG // aW9uMSEwHwYDVQQDExhNaWNyb3NvZnQgVGltZS1TdGFt
 // SIG // cCBQQ0ECEzMAAAEiJ+9r7eL7oKMAAAAAASIwCQYFKw4D
 // SIG // AhoFAKBdMBgGCSqGSIb3DQEJAzELBgkqhkiG9w0BBwEw
-// SIG // HAYJKoZIhvcNAQkFMQ8XDTE5MDIyNzA5MTQxOFowIwYJ
-// SIG // KoZIhvcNAQkEMRYEFMIDrI5EpI20Kss6kDuvfHONyF7Q
-// SIG // MA0GCSqGSIb3DQEBBQUABIIBALOWcVuVRtS0LO4YX9QR
-// SIG // bgRgPybCYV/SOIn14eU3ERdhYYEFs0Ksh4kQQBtXLd90
-// SIG // 0mGmkKmIioHOSncDisC4uheYfKY8M2JFika9BJLETWlK
-// SIG // x9LKLvotQhKoIufPCpfY8cZuBihDn3i8nrebKSDro2AA
-// SIG // /+e7KTgVKpWwIdqBRsdOYXDLX212OVBvFsSt2yr4IQfn
-// SIG // 8XlI+yjc+qIBVjbowkzOQB27kbiJWYbaZ077DwW5gwSt
-// SIG // z9BhRDcLcI7qwp398a5LcuNQFdBf0Fwla/821H9WFEFL
-// SIG // WYT6jSvzLt4G5vqu9tYyk3rUEnHskCWDfopENeo3tMnw
-// SIG // Ou/621e8HI/25P0=
+// SIG // HAYJKoZIhvcNAQkFMQ8XDTE5MDIyNzA5MTQxN1owIwYJ
+// SIG // KoZIhvcNAQkEMRYEFEzE9p5652dgkN9hGUFgUH+NOz8Z
+// SIG // MA0GCSqGSIb3DQEBBQUABIIBAJ+LnDxZXUFRq66xt+gS
+// SIG // nsz8lnF9rkG3btNDlozUcz7UICAZGn5DyE34GanQQ85e
+// SIG // jcqq3OYbpa5bCoV/qOhbCCURe7Ut0YdIjqxKeXXDJ8L8
+// SIG // eMccWa3FOUY162VsPLK8c+AjD2f+RbKNP6o6ZKJZ1Hjf
+// SIG // XcHqaFR8bfrf1GXC7grVp03E4A/4pL7PwsEJ7zPpCGjx
+// SIG // nLUgx9EZ4Kwx+auxb+8B2oMG6HCnfB0bdgCXloVo7Wr8
+// SIG // CW7R7zt9er2f/zMHPjWKOHLNGO+ZGXs5CzxVe5qZ6eV1
+// SIG // VtrbOA/OH7mmWdO5WEL37qC5dcmjeWbcjdRSKWKRqXb5
+// SIG // 2QPnxwBff4p0Qfc=
 // SIG // End signature block
