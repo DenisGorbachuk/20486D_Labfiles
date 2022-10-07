@@ -7,6 +7,7 @@ using Library.Data;
 using Library.Models;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace Library.Controllers
@@ -23,6 +24,7 @@ namespace Library.Controllers
             _environment = environment;
         }
 
+        [AllowAnonymous]
         public IActionResult Index()
         {
             var booksQuery = from b in _context.Books
@@ -33,19 +35,17 @@ namespace Library.Controllers
             return View(booksQuery);
         }
 
+        [Authorize]
         public IActionResult GetBooksByGener()
         {
-            if (this.User.Identity.IsAuthenticated)
-            {
-                var booksGenerQuery = from b in _context.Books
-                                      orderby b.Genre.Name
-                                      select b;
+            var booksGenerQuery = from b in _context.Books
+                                  orderby b.Genre.Name
+                                  select b;
 
-                return View(booksGenerQuery);
-            }
-            return RedirectToAction("Login", "Account");
+            return View(booksGenerQuery);
         }
 
+        [Authorize]
         public IActionResult LendingBook(int id)
         {
             Book book = _context.Books.FirstOrDefault(b => b.Id == id);
@@ -56,7 +56,9 @@ namespace Library.Controllers
             return View(book);
         }
 
+        [Authorize]
         [HttpPost, ActionName("LendingBook")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> LendingBookPost(int id)
         {
             var bookToUpdate = _context.Books.FirstOrDefault(b => b.Id == id);
